@@ -1,5 +1,6 @@
 import abc
 import model
+from typing import List
 
 
 class AbstractRepository(abc.ABC):
@@ -9,6 +10,10 @@ class AbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     def get(self, reference) -> model.Batch:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def list(self) -> List[model.Batch]:
         raise NotImplementedError
 
 

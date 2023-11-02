@@ -55,20 +55,34 @@ def test_commits():
 
 def test_deallocate_decrements_available_quantity():
     repo, session = FakeRepository([]), FakeSession()
-    # TODO: you'll need to implement the services.add_batch method
     services.add_batch("b1", "BLUE-PLINTH", 100, None, repo, session)
     line = model.OrderLine("o1", "BLUE-PLINTH", 10)
     services.allocate(line, repo, session)
     batch = repo.get(reference="b1")
     assert batch.available_quantity == 90
-    # services.deallocate(...
-    ...
+    services.deallocate(line, repo, session)
     assert batch.available_quantity == 100
 
 
 def test_deallocate_decrements_correct_quantity():
-    ...  #  TODO - check that we decrement the right sku
+    repo, session = FakeRepository([]), FakeSession()
+    services.add_batch("b1", "BLUE-PLINTH", 100, None, repo, session)
+    services.add_batch("b2", "RED-PLINTH", 50, None, repo, session)
+    line1 = model.OrderLine("o1", "BLUE-PLINTH", 10)
+    line2 = model.OrderLine("o2", "RED-PLINTH", 20)
+    services.allocate(line1, repo, session)
+    services.allocate(line2, repo, session)
+    batch1 = repo.get(reference="b1")
+    batch2 = repo.get(reference="b2")
+    services.deallocate(line1, repo, session)
+    services.deallocate(line2, repo, session)
+    assert batch1.available_quantity == 100
+    assert batch2.available_quantity == 50
 
 
 def test_trying_to_deallocate_unallocated_batch():
-    ...  #  TODO: should this error or pass silently? up to you.
+    repo, session = FakeRepository([]), FakeSession()
+    line = model.OrderLine("o1", "NON_EXISTENT_SKU", 10)
+
+    with pytest.raises(services.InvalidSku, match="Invalid sku NON_EXISTENT_SKU"):
+        services.deallocate(line, repo, session)

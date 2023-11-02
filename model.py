@@ -8,6 +8,10 @@ class OutOfStock(Exception):
     pass
 
 
+class UnallocatedBatch(Exception):
+    pass
+
+
 def allocate(line: OrderLine, batches: List[Batch]) -> str:
     try:
         batch = next(b for b in sorted(batches) if b.can_allocate(line))
@@ -15,6 +19,16 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
         return batch.reference
     except StopIteration:
         raise OutOfStock(f"Out of stock for sku {line.sku}")
+
+
+# TODO: determine if the proper exception needs to be thrown
+def deallocate(line: OrderLine, batches: List[Batch]):
+    try:
+        batch = next(b for b in sorted(batches) if b.sku is line.sku)
+        batch.deallocate(line)
+        return batch.reference
+    except StopIteration:
+        raise UnallocatedBatch(f"Sku {line.sku} was not allocated")
 
 
 @dataclass(unsafe_hash=True)
