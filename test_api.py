@@ -58,8 +58,8 @@ def test_unhappy_path_returns_400_and_error_message():
 def test_deallocate():
     sku, order1, order2 = random_sku(), random_orderid(), random_orderid()
     batch = random_batchref()
-    # post_to_add_batch(batch, sku, 100, "2011-01-02")
     url = config.get_api_url()
+
     # create batch
     r = requests.post(
         f"{url}/batch", json={"ref": batch, "sku": sku, "qty": 100, "eta": "2011-01-02"}
@@ -93,4 +93,4 @@ def test_deallocate():
         f"{url}/allocate", json={"orderid": order2, "sku": sku, "qty": 100}
     )
     assert r.ok
-    assert r.json()["batchid"] == batch
+    assert r.json()["batchref"] == batch

@@ -24,7 +24,7 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
 # TODO: determine if the proper exception needs to be thrown
 def deallocate(line: OrderLine, batches: List[Batch]):
     try:
-        batch = next(b for b in sorted(batches) if b.sku is line.sku)
+        batch = next(b for b in sorted(batches) if b.can_deallocate(line))
         batch.deallocate(line)
         return batch.reference
     except StopIteration:
@@ -82,3 +82,6 @@ class Batch:
 
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.available_quantity >= line.qty
+
+    def can_deallocate(self, line: OrderLine) -> bool:
+        return self.sku == line.sku and line in self._allocations

@@ -38,8 +38,8 @@ def batch_endpoint():
     repo = repository.SqlAlchemyRepository(session)
     ref, sku, qty, eta = request.json["ref"], request.json["sku"], request.json["qty"], request.json["eta"]
 
-    batchref = services.add_batch(ref, sku, qty, eta, repo, session)
-    return {"batchref": batchref}, 201
+    services.add_batch(ref, sku, qty, eta, repo, session)
+    return {"batchref": ref}, 201
 
 
 @app.route("/deallocate", methods=["POST"])
@@ -53,4 +53,4 @@ def deallocate_endpoint():
     except (model.UnallocatedBatch, services.InvalidSku) as e:
         return {"message": str(e)}, 400
 
-    return {"batchref": batchref}, 201
+    return {"batchref": batchref}, 200
