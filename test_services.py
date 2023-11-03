@@ -17,6 +17,11 @@ class FakeRepository(repository.AbstractRepository):
     def list(self):
         return list(self._batches)
 
+    def order_line_by_orderid_and_sky(self, sku, orderid) -> model.OrderLine:
+        batch = next(b for b in self._batches if b.sku == sku)
+        order_line = next(ol for ol in batch._allocations if ol.sku == sku and ol.orderid == orderid)
+        return order_line
+
 
 class FakeSession:
     committed = False
@@ -60,7 +65,7 @@ def test_deallocate_decrements_available_quantity():
     services.allocate(line, repo, session)
     batch = repo.get(reference="b1")
     assert batch.available_quantity == 90
-    services.deallocate(line, repo, session)
+    services.deallocate(line.sku, line.orderid, repo, session)
     assert batch.available_quantity == 100
 
 
@@ -74,8 +79,8 @@ def test_deallocate_decrements_correct_quantity():
     services.allocate(line2, repo, session)
     batch1 = repo.get(reference="b1")
     batch2 = repo.get(reference="b2")
-    services.deallocate(line1, repo, session)
-    services.deallocate(line2, repo, session)
+    services.deallocate(line1.sku, line1.orderid, repo, session)
+    services.deallocate(line2.sku, line2.orderid, repo, session)
     assert batch1.available_quantity == 100
     assert batch2.available_quantity == 50
 
@@ -85,4 +90,4 @@ def test_trying_to_deallocate_unallocated_batch():
     line = model.OrderLine("o1", "NON_EXISTENT_SKU", 10)
 
     with pytest.raises(services.InvalidSku, match="Invalid sku NON_EXISTENT_SKU"):
-        services.deallocate(line, repo, session)
+        services.deallocate(line.sku, line.orderid, repo, session)

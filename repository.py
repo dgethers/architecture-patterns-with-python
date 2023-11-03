@@ -16,6 +16,10 @@ class AbstractRepository(abc.ABC):
     def list(self) -> List[model.Batch]:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def order_line_by_orderid_and_sky(self, sku, orderid) -> model.OrderLine:
+        raise NotImplementedError
+
 
 class SqlAlchemyRepository(AbstractRepository):
     def __init__(self, session):
@@ -29,3 +33,7 @@ class SqlAlchemyRepository(AbstractRepository):
 
     def list(self):
         return self.session.query(model.Batch).all()
+
+    def order_line_by_orderid_and_sky(self, sku, orderid) -> model.OrderLine:
+        return self.session.query(model.OrderLine).filter_by(sku=sku, orderid=orderid).one()
+

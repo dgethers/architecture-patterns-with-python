@@ -46,13 +46,10 @@ def batch_endpoint():
 def deallocate_endpoint():
     session = get_session()
     repo = repository.SqlAlchemyRepository(session)
-    line = model.OrderLine(
-        request.json["orderid"],
-        request.json["sku"],
-    )
+    orderid, sku = request.json["orderid"], request.json["sku"]
 
     try:
-        batchref = services.deallocate(line, repo, session)
+        batchref = services.deallocate(sku, orderid, repo, session)
     except (model.UnallocatedBatch, services.InvalidSku) as e:
         return {"message": str(e)}, 400
 
