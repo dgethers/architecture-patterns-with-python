@@ -20,7 +20,7 @@ batches = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("reference", String(255)),
-    Column("sku", String(255)),
+    Column("sku", ForeignKey("products.sku")),
     Column("_purchased_quantity", Integer, nullable=False),
     Column("eta", Date, nullable=True),
 )
@@ -36,9 +36,7 @@ allocations = Table(
 products = Table(
     "products",
     metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("sku", String(255)),
-    Column("batch_id", ForeignKey("batches.id")),
+    Column("sku", String(255), primary_key=True),
 )
 
 
