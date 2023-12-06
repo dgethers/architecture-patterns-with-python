@@ -23,7 +23,15 @@ def add_batch(
     uow: unit_of_work.AbstractUnitOfWork,
 ):
     with uow:
-        uow.batches.add(model.Batch(ref, sku, qty, eta))
+        product = uow.products.get(sku=sku)
+
+        # todo: what happens if batch on a product is added twice?
+        if product is None:
+            product = model.Product(sku, batches=[model.Batch(ref, sku, qty, eta)])
+            uow.products.add(product)
+        else:
+            product.batches.append(model.Batch(ref, sku, qty, eta))
+
         uow.commit()
 
 
@@ -34,10 +42,12 @@ def allocate(
     uow: unit_of_work.AbstractUnitOfWork,
 ) -> str:
     line = OrderLine(orderid, sku, qty)
+
     with uow:
-        batches = uow.batches.list()
-        if not is_valid_sku(line.sku, batches):
+        product = uow.products.get(sku=sku)
+        if product is None or not is_valid_sku(sku, product.batches):
             raise InvalidSku(f"Invalid sku {line.sku}")
-        batchref = model.allocate(line, batches)
+
+        batchref = product.allocate(line)
         uow.commit()
     return batchref
