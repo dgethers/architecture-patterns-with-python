@@ -9,17 +9,20 @@ class FakeRepository(repository.AbstractRepository):
         super().__init__()
         self._products = set(products)
 
-    def _add(self, product):
+    def add(self, product):
         self._products.add(product)
 
-    def _get(self, sku):
+    def get(self, sku):
         return next((p for p in self._products if p.sku == sku), None)
 
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def __init__(self):
-        self.products = FakeRepository([])
+        self._repo = FakeRepository([])
         self.committed = False
+
+    def __enter__(self):
+        self.products = repository.TrackingRepository(self._repo)
 
     def _commit(self):
         self.committed = True

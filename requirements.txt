@@ -1,4 +1,3 @@
--e git+ssh://git@github.com/dgethers/architecture-patterns-with-python.git@e73821922cb789e141282fc70b9b6b4133ab7716#egg=allocation&subdirectory=src
 blinker==1.6.3
 certifi==2023.7.22
 charset-normalizer==3.3.2
